@@ -35,7 +35,7 @@ print(
 )
 
 print(
-    f"{'Prompt tokens: ' if len(sys.argv) > VERBOSE_ARG_INDEX and sys.argv[VERBOSE_ARG_INDEX] == '--verbose' else ''} {response.usage_metadata.prompt_token_count}",
+    f"{'Prompt tokens: ' if len(sys.argv) > VERBOSE_ARG_INDEX and sys.argv[VERBOSE_ARG_INDEX] == '--verbose' else ''}{response.usage_metadata.prompt_token_count}",
 ) if response.usage_metadata is not None else print("No usage metadata available.")
 
 

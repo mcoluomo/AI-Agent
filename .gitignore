@@ -6,6 +6,7 @@ venv/
 # Python cache files
 __pycache__/
 *.pyc
+__pycache__/
 
 # MyPy and type stub cache
 .mypy_cache/
