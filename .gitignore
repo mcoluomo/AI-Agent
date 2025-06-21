@@ -1,0 +1,18 @@
+# Python virtual environments
+venv/
+.env
+*.env
+
+# Python cache files
+__pycache__/
+*.pyc
+
+# MyPy and type stub cache
+.mypy_cache/
+*.pyi
+
+# VS Code settings (optional, if you use workspace settings)
+.vscode/
+
+# OS files
+.DS_Store
