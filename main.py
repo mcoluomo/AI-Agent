@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 
 from google import genai
 from google.genai import types
+from promps import system_prompt
 
 if len(sys.argv) == 1:
     print("Error: Please provide a prompt as a command-line argument.")
@@ -21,6 +22,7 @@ messages = [
 response = client.models.generate_content(
     model="gemini-2.0-flash-001",
     contents=messages,
+    config=types.GenerateContentConfig(system_instruction=system_prompt),
 )
 
 
@@ -42,3 +44,5 @@ print(
 print(
     f"{'Response tokens: ' if len(sys.argv) > VERBOSE_ARG_INDEX and sys.argv[VERBOSE_ARG_INDEX] == '--verbose' else ''}{response.usage_metadata.candidates_token_count}",
 ) if response.usage_metadata is not None else print("No usage metadata available.")
+print("Response:")
+print(response.text)
