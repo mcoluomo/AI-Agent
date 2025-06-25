@@ -5,44 +5,52 @@ from dotenv import load_dotenv
 
 from google import genai
 from google.genai import types
-from promps import system_prompt
-
-if len(sys.argv) == 1:
-    print("Error: Please provide a prompt as a command-line argument.")
-    sys.exit(1)
-
-load_dotenv()
-api_key = os.environ.get("GEMINI_API_KEY")
-
-client = genai.Client(api_key=api_key)
-
-messages = [
-    types.Content(role="user", parts=[types.Part(text=sys.argv[1])]),
-]
-response = client.models.generate_content(
-    model="gemini-2.0-flash-001",
-    contents=messages,
-    config=types.GenerateContentConfig(system_instruction=system_prompt),
-)
+from promps import available_functions, system_prompt
 
 
-print(response)
+def main():
+    load_dotenv()
 
-VERBOSE_ARG_INDEX = 2
-print(
-    "User prompt: "
-    if len(sys.argv) > VERBOSE_ARG_INDEX and sys.argv[VERBOSE_ARG_INDEX] == "--verbose"
-    else "",
-    sys.argv[1],
-)
+    if len(sys.argv) == 1:
+        print("Error: Please provide a prompt as a command-line argument.\n")
+        print("AI Code Assistant")
+        print('\nUsage: python main.py "your prompt here" [--verbose]')
+        print('Example: python main.py "How do I fix the calculator?"')
+        sys.exit(1)
 
-print(
-    f"{'Prompt tokens: ' if len(sys.argv) > VERBOSE_ARG_INDEX and sys.argv[VERBOSE_ARG_INDEX] == '--verbose' else ''}{response.usage_metadata.prompt_token_count}",
-) if response.usage_metadata is not None else print("No usage metadata available.")
+    user_prompt = sys.argv[1]
+
+    verbose = "--verbose" in sys.argv
+
+    api_key = os.environ.get("GEMINI_API_KEY")
+
+    client = genai.Client(api_key=api_key)
+    if verbose:
+        print(f"User prompt: {user_prompt}\n")
+
+    messages = [
+        types.Content(role="user", parts=[types.Part(text=user_prompt)]),
+    ]
+    generate_content(client, messages, verbose)
 
 
-print(
-    f"{'Response tokens: ' if len(sys.argv) > VERBOSE_ARG_INDEX and sys.argv[VERBOSE_ARG_INDEX] == '--verbose' else ''}{response.usage_metadata.candidates_token_count}",
-) if response.usage_metadata is not None else print("No usage metadata available.")
-print("Response:")
-print(response.text)
+def generate_content(client, messages, verbose):
+    response = client.models.generate_content(
+        model="gemini-2.0-flash-001",
+        contents=messages,
+        config=types.GenerateContentConfig(
+            tools=[available_functions],
+            system_instruction=system_prompt,
+        ),
+    )
+
+    if verbose:
+        print("Prompt tokens:", response.usage_metadata.prompt_token_count)
+        print("Response tokens:", response.usage_metadata.candidates_token_count)
+    print("Response:")
+    for function_call_part in response.function_calls:
+        print(f"Calling function: {function_call_part.name}({function_call_part.args})")
+
+
+if __name__ == "__main__":
+    main()
