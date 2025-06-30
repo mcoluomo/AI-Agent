@@ -1,0 +1,57 @@
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".hg",
+    ".ipynb_checkpoints",
+    ".mypy_cache",
+    ".nox",
+    ".pyenv",
+    ".pytest_cache",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    ".vscode",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "site-packages",
+    "venv",
+]
+preview = true
+
+[tool.ruff.lint]
+per-file-ignores = { "__init__.py" = ["F401", "F811"], "test_*.py" = ["ANN"] }
+
+select = [
+    "E",
+    "F",
+    "B",
+    "ANN",
+    "COM",
+    "C90",
+    "DJ",
+    "EXE",
+    "T10",
+    "TID",
+    "TRY003",
+    "TD002",
+    "TD003",
+    "FIX002",
+]
+ignore = [
+    "E501",  # Line too long
+    "E712",  # Use of == True/False
+    "UP017", # Use of timezone.utc() instead of datetime.UTC
+]
+fixable = ["F401", "NPY001", "RUF100"]

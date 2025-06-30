@@ -18,7 +18,7 @@ class FunctionCallError(Exception):
     pass
 
 
-def main():
+def main() -> None:
     load_dotenv()
 
     if len(sys.argv) == 1:
@@ -35,13 +35,36 @@ def main():
     api_key = os.environ.get("GEMINI_API_KEY")
 
     client = genai.Client(api_key=api_key)
+
     if verbose:
         print(f"User prompt: {user_prompt}\n")
 
     messages = [
         types.Content(role="user", parts=[types.Part(text=user_prompt)]),
     ]
-    generate_content(client, messages, verbose)
+
+    for _ in range(20):
+        response = generate_content(client, messages, verbose)
+        for candidate in response.candidates:
+            messages.append(candidate.content)
+
+        if not response.function_calls:
+            print("Final response:")
+            print(response.text)
+            break
+
+        # Print function calls if present    # Print the main text/content response
+        for function_call_part in response.function_calls:
+            if verbose:
+                print(f"Calling function: {function_call_part.name}")
+            else:
+                print(f"Calling function: {function_call_part.name}")
+
+            function_call_result = call_function(function_call_part, verbose)
+
+            messages.append(function_call_result)
+            # Continue the loop - LLM will see function results and decide next step
+        continue
 
 
 def generate_content(client, messages, verbose):
@@ -57,30 +80,10 @@ def generate_content(client, messages, verbose):
     if verbose:
         print("Prompt tokens:", response.usage_metadata.prompt_token_count)
         print("Response tokens:", response.usage_metadata.candidates_token_count)
-    print("Response:")
 
     # Print the main text/content response
-    if not response.function_calls:
-        return response.text
 
-        # Print function calls if present    # Print the main text/content response
-    for function_call_part in response.function_calls:
-        if verbose:
-            print(
-                f"Calling function: {function_call_part.name}({function_call_part.args})\n",
-            )
-        function_call_result = call_function(function_call_part, verbose)
-        result = function_call_result.parts[0].function_response.response
-
-        if not result:
-            raise FunctionCallError("Function call did not return a result.")
-        if verbose:
-            print(f"-> {result}")
-
-        else:
-            print(f" - Calling function: {function_call_part.name}\n")
-
-    return None
+    return response
 
 
 def call_function(function_call_part, verbose=False):
